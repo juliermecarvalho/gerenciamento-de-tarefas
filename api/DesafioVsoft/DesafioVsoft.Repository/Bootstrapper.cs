@@ -21,8 +21,11 @@ public static class Bootstrapper
     /// <param name="connectionString">String de conexão do banco SQLite</param>
     public static void AddInfrastructure(this IServiceCollection services, string connectionString)
     {
-
-
+        var temp = Path.GetTempPath();
+        string migrationsPath = Path.Combine(temp, "DesafioVsoft.Migrations");
+        Directory.CreateDirectory(migrationsPath);
+        var database = Path.Combine(migrationsPath, "database.db");
+        connectionString = $"Data Source={database}";
         // Configurar o contexto
         var optionsBuilder = new DbContextOptionsBuilder<AppDbContext>();
         optionsBuilder.UseSqlite(connectionString, b =>

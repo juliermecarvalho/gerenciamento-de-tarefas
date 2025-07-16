@@ -1,6 +1,7 @@
 ﻿using DesafioVsoft.Repository.Data;
 using DesafioVsoft.Domain.Entities;
 using DesafioVsoft.Domain.Repositories;
+using Microsoft.EntityFrameworkCore;
 
 
 namespace DesafioVsoft.Repository.Repositories;
@@ -15,4 +16,8 @@ public class UserRepository : BaseRepository<User>, IUserRepository
     {
     }
 
+    public async Task<bool> AnyAsync(Guid id)
+    {
+        return await _dbSet.AnyAsync(u => u.Id == id);
+    }
 }

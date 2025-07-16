@@ -30,7 +30,7 @@ public class UserController : ControllerBase
 
 
     [HttpGet("{id}")]
-    public async Task<ActionResult<UserOutputDto>> GetById(int id)
+    public async Task<ActionResult<UserOutputDto>> GetById(Guid id)
     {
         var user = await _userRepository.GetByIdAsync(id);
         if (user is null)
@@ -45,12 +45,12 @@ public class UserController : ControllerBase
     {
         var user = UserMapper.ToEntity(dto);
         await _userRepository.AddOrUpdateAsync(user);
-        return CreatedAtAction(nameof(GetById), new { id = user.Id, version = "1.0" }, null);
+        return CreatedAtAction(nameof(GetById), new { id = user.Id }, null);
     }
 
 
-    [HttpPut("{id}")]
-    public async Task<ActionResult> Update(int id, [FromBody] UserInputDto dto)
+    [HttpPut("{id:guid}")]
+    public async Task<ActionResult> Update(Guid id, [FromBody] UserInputDto dto)
     {
         var user = await _userRepository.GetByIdAsync(id);
         if (user is null)
@@ -62,8 +62,8 @@ public class UserController : ControllerBase
     }
 
 
-    [HttpDelete("{id}")]
-    public async Task<ActionResult> Delete(int id)
+    [HttpDelete("{id:guid}")]
+    public async Task<ActionResult> Delete(Guid id)
     {
         var user = await _userRepository.GetByIdAsync(id);
         if (user is null)
@@ -118,7 +118,5 @@ public class UserController : ControllerBase
             sb.Append(chars[rng.Next(chars.Length)]);
         return sb.ToString();
     }
-
-
 
 }

@@ -18,9 +18,13 @@ public class MigrationsDbContextFactory : IDesignTimeDbContextFactory<AppDbConte
 {
     public AppDbContext CreateDbContext(string[] args)
     {
+        var temp = Path.GetTempPath();
+        string migrationsPath = Path.Combine(temp, "DesafioVsoft.Migrations");
+        Directory.CreateDirectory(migrationsPath);
+        var database = Path.Combine(migrationsPath, "database.db");
 
         var optionsBuilder = new DbContextOptionsBuilder<AppDbContext>();
-        optionsBuilder.UseSqlite("Data Source=../DesafioVsoft.Api/Data/database.db");
+        optionsBuilder.UseSqlite($"Data Source={database}");
 
         return new AppDbContext(optionsBuilder.Options);
     }

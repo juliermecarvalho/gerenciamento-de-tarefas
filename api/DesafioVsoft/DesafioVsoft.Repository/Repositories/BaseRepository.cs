@@ -1,12 +1,14 @@
-﻿using DesafioVsoft.Domain.Repositories;
+﻿using DesafioVsoft.Domain.Entities;
+using DesafioVsoft.Domain.Repositories;
 using DesafioVsoft.Repository.Data;
 using Microsoft.EntityFrameworkCore;
+using System.Linq.Expressions;
 namespace DesafioVsoft.Repository.Repositories;
 
 /// <summary>
 /// Implementação base genérica para repositórios
 /// </summary>
-public class BaseRepository<T> : IBaseRepository<T> where T : class
+public class BaseRepository<T> : IBaseRepository<T> where T : class, IEntity
 {
     protected readonly AppDbContext _context;
     protected readonly DbSet<T> _dbSet;
@@ -17,23 +19,29 @@ public class BaseRepository<T> : IBaseRepository<T> where T : class
         _dbSet = _context.Set<T>();
     }
 
-    public async Task<List<T>> GetAllAsync() =>
-        await _dbSet.ToListAsync();
 
-    public async Task<T?> GetByIdAsync(int id) =>
+    public async Task<T?> GetByIdAsync(Guid id) =>
         await _dbSet.FindAsync(id);
 
     public async Task AddOrUpdateAsync(T entity)
     {
-        var entry = _context.Entry(entity);
-        if (entry.State == EntityState.Detached)
+
+        var existing = await _dbSet.FindAsync(entity.Id);
+        if (existing == null)
         {
-            _dbSet.Update(entity); // Update faz Add se não existir
+            _dbSet.Add(entity); // Entidade não existe no banco, adiciona
         }
+        else
+        {
+            _context.Entry(existing).CurrentValues.SetValues(entity); // Atualiza os valores
+        }
+
+
         await _context.SaveChangesAsync();
     }
 
-    public async Task DeleteAsync(int id)
+
+    public async Task DeleteAsync(Guid id)
     {
         var entity = await GetByIdAsync(id);
         if (entity != null)
@@ -41,5 +49,27 @@ public class BaseRepository<T> : IBaseRepository<T> where T : class
             _dbSet.Remove(entity);
             await _context.SaveChangesAsync();
         }
+    }
+
+    public async Task<IEnumerable<T>> GetAllAsync(
+        Expression<Func<T, bool>>? filtro = null,
+        Func<IQueryable<T>, IOrderedQueryable<T>>? ordenarPor = null,
+        bool asNoTracking = true,
+        params Func<IQueryable<T>, IQueryable<T>>[]? includes)
+    {
+        var query = _dbSet.AsQueryable();
+        if (filtro is not null)
+        {
+            query = query.Where(filtro);
+        }
+
+        query = ordenarPor is not null ? ordenarPor(query) : query.OrderBy(q => q.Id);
+
+        query = includes?.Aggregate(query, (current, include) => include(current));
+
+        if (asNoTracking)
+            query = query.AsNoTracking();
+
+        return await query.ToListAsync();
     }
 }

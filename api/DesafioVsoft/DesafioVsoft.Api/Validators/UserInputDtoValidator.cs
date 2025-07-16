@@ -1,7 +1,6 @@
 ﻿
 using DesafioVsoft.Api.Dtos;
 using FluentValidation;
-using DesafioVsoft.Api.Dtos;
 
 namespace DesafioVsoft.Api.Validators;
 
@@ -21,4 +20,3 @@ public class UserInputDtoValidator : AbstractValidator<UserInputDto>
             .EmailAddress().WithMessage("E-mail inválido");
     }
 }
-

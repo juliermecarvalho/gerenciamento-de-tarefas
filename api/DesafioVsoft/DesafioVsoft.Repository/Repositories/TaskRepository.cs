@@ -13,5 +13,4 @@ public class TaskRepository : BaseRepository<TaskItem>, ITaskRepository
     public TaskRepository(AppDbContext context) : base(context)
     {
     }
-
 }

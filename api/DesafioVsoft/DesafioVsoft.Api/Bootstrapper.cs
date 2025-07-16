@@ -6,6 +6,7 @@ using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ApiExplorer;
 using Microsoft.AspNetCore.Mvc.Versioning;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.OpenApi.Models;
 
@@ -26,7 +27,9 @@ public static class ApiBootstrapper
 
         services.AddFluentValidationAutoValidation();
         services.AddFluentValidationClientsideAdapters();
+
         services.AddValidatorsFromAssemblyContaining<UserInputDtoValidator>();
+
 
         // Banco de dados SQLite
         var connectionString = configuration.GetConnectionString("DefaultConnection");
@@ -75,12 +78,13 @@ public static class ApiBootstrapper
             });
         }
 
-        //// Garante que o banco existe
-        //using (var scope = app.Services.CreateScope())
-        //{
-        //    var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-        //    db.Database.EnsureCreated();
-        //}
+        // Aplica migrations pendentes automaticamente
+        using (var scope = app.Services.CreateScope())
+        {
+            var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+            db.Database.Migrate();
+        }
+
 
         app.UseHttpsRedirection();
         app.UseAuthorization();

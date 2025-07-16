@@ -7,4 +7,5 @@ namespace DesafioVsoft.Domain.Repositories;
 /// </summary>
 public interface IUserRepository : IBaseRepository<User>
 {
+    Task<bool> AnyAsync(Guid id);
 }
