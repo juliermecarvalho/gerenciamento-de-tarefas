@@ -397,12 +397,9 @@ MigrationBackup/
 FodyWeavers.xsd
 
 # VS Code files for those working on multiple tools
+.vs/*
 .vscode/*
-!.vscode/settings.json
-!.vscode/tasks.json
-!.vscode/launch.json
-!.vscode/extensions.json
-!.vscode/*.code-snippets
+
 
 # Local History for Visual Studio Code
 .history/
@@ -416,3 +413,44 @@ FodyWeavers.xsd
 *.msix
 *.msm
 *.msp
+
+
+# Ignorar arquivos de build
+/dist
+/build
+
+# Ignorar node_modules
+/node_modules
+
+# Ignorar logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+/logs
+*.log
+
+# Ignorar arquivos de dependência
+package-lock.json
+pnpm-lock.yaml
+yarn.lock
+
+# Ignorar arquivos de configuração e temporários do ambiente
+.env
+.env.*.local
+.DS_Store
+Thumbs.db
+.vscode/
+*.sublime-project
+*.sublime-workspace
+.idea/
+.vs/
+
+# Ignorar resultados de testes
+/coverage
+
+# Ignorar arquivos específicos do editor (VS Code)
+.vscode/settings.json
+.vscode/tasks.json
+.vscode/launch.json
+.vscode/extensions.json
+.vscode/*.code-workspace
