@@ -9,6 +9,7 @@ public class User
 
     public string Name { get; set; } = string.Empty;
 
+    public string Password { get; set; } = "123";
     public string Email { get; set; } = string.Empty;
 
     // Lista de tarefas atribuídas ao usuário

@@ -18,8 +18,7 @@ $rodarUpdate = Read-Host -Prompt 'Deseja rodar o update? (Y/N)'
 # Verifica a resposta do usuário e, se for 'Y', roda o update
 if ($rodarUpdate -eq 'Y') {
    
-    # Gera o script SQL no caminho especificado
-    dotnet ef migrations script -p ..\DesafioVsoft.Migrations\DesafioVsoft.Migrations.csproj 
+    dotnet ef database update -p ..\DesafioVsoft.Migrations\DesafioVsoft.Migrations.csproj 
 
 } else {
     # Pergunta se deseja remover a migração

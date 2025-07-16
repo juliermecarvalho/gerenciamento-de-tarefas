@@ -54,6 +54,7 @@ public static class ApiBootstrapper
 
         services.AddSwaggerGen();
         services.ConfigureOptions<ConfigureSwaggerOptions>();
+
     }
 
     /// <summary>
@@ -74,12 +75,12 @@ public static class ApiBootstrapper
             });
         }
 
-        // Garante que o banco existe
-        using (var scope = app.Services.CreateScope())
-        {
-            var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-            db.Database.EnsureCreated();
-        }
+        //// Garante que o banco existe
+        //using (var scope = app.Services.CreateScope())
+        //{
+        //    var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+        //    db.Database.EnsureCreated();
+        //}
 
         app.UseHttpsRedirection();
         app.UseAuthorization();

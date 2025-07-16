@@ -95,7 +95,7 @@ public class UserController : ControllerBase
             var user = new User
             {
                 Name = userName,
-                Email = $"{userName}@example.com"
+                Email = $"{userName}@example.com".Replace(" ", "")
             };
 
             createdUsers.Add(user);
