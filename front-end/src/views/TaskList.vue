@@ -1,29 +1,29 @@
 <script setup>
-import { onMounted, ref } from 'vue'
-import { useRouter } from 'vue-router'
-import { getTasks, deleteTask, updateTask } from '../services/taskService'
+import { onMounted, ref } from "vue";
+import { useRouter } from "vue-router";
+import { getTasks, deleteTask, updateTask } from "../services/taskService";
 
-const router = useRouter()
-const tasks = ref([])
-const loading = ref(true)
-const error = ref(null)
+const router = useRouter();
+const tasks = ref([]);
+const loading = ref(true);
+const error = ref(null);
 
 async function loadTasks() {
-  loading.value = true
-  error.value = null
+  loading.value = true;
+  error.value = null;
   try {
-    tasks.value = await getTasks()
+    tasks.value = await getTasks();
   } catch (err) {
-    error.value = 'Erro ao buscar tarefas'
+    error.value = "Erro ao buscar tarefas";
   } finally {
-    loading.value = false
+    loading.value = false;
   }
 }
 
 async function handleDelete(id) {
-  if (confirm('Deseja excluir esta tarefa?')) {
-    await deleteTask(id)
-    await loadTasks()
+  if (confirm("Deseja excluir esta tarefa?")) {
+    await deleteTask(id);
+    await loadTasks();
   }
 }
 
@@ -31,22 +31,29 @@ async function handleComplete(task) {
   await updateTask(task.id, {
     title: task.title,
     description: task.description,
-    isCompleted: true
-  })
-  await loadTasks()
+    isCompleted: true,
+  });
+  await loadTasks();
 }
 
 function handleEdit(task) {
-  router.push({ name: 'TaskCreate', query: { id: task.id } })
+  router.push({ name: "TaskCreate", query: { id: task.id } });
 }
 
-onMounted(loadTasks)
+onMounted(loadTasks);
 </script>
 
 <template>
   <div class="max-w-5xl mx-auto mt-8 p-6 bg-white rounded shadow">
-    <h1 class="text-2xl font-bold mb-4">Lista de Tarefas</h1>
-
+    <div class="flex justify-between items-center mb-4">
+      <h1 class="text-2xl font-bold mb-4">Lista de Tarefas</h1>
+      <button
+        @click="router.push('/task/create')"
+        class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
+      >
+        Nova Tarefa
+      </button>
+    </div>
     <p v-if="loading">Carregando...</p>
     <p v-if="error" class="text-red-500">{{ error }}</p>
 
@@ -64,43 +71,53 @@ onMounted(loadTasks)
         <tr v-for="task in tasks" :key="task.id" class="border-b">
           <td class="p-2 border">{{ task.title }}</td>
           <td class="p-2 border">{{ task.description }}</td>
-          <td class="p-2 border">{{ task.name ?? '---' }}</td>
+          <td class="p-2 border">{{ task.name ?? "---" }}</td>
           <td class="p-2 border">
-            <span :class="task.isCompleted ? 'text-green-600' : 'text-yellow-500'">
-              {{ task.isCompleted ? 'Concluída' : 'Pendente' }}
+            <span
+              :class="task.isCompleted ? 'text-green-600' : 'text-yellow-500'"
+            >
+              {{ task.isCompleted ? "Concluída" : "Pendente" }}
             </span>
           </td>
-          <td class="p-2 border flex gap-2 justify-center">
-            <button
-              @click="handleComplete(task)"
-              :disabled="task.isCompleted"
-              class="text-sm px-2 py-1 rounded bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50"
-            >
-              Finalizar
-            </button>
-            <button
-              @click="handleDelete(task.id)"
-              :disabled="task.isCompleted"
-              class="text-sm px-2 py-1 rounded bg-red-600 text-white hover:bg-red-700 disabled:opacity-50"
-            >
-              Deletar
-            </button>
-            <button
-              :disabled="task.isCompleted"
-              class="text-sm px-2 py-1 rounded bg-gray-200 hover:bg-gray-300 disabled:opacity-50"
-              title="Atribuir usuário"
-            >
-              👤
-            </button>
-            <button
-              @click="handleEdit(task)"
-              :disabled="task.isCompleted"
-              class="text-sm px-2 py-1 rounded bg-gray-200 hover:bg-gray-300 disabled:opacity-50"
-              title="Editar tarefa"
-            >
-              ✏️
-            </button>
-          </td>
+       <td class="p-2 border text-center">
+  <div class="flex justify-center space-x-2">
+    <button
+      @click="handleComplete(task)"
+      :disabled="task.isCompleted"
+      class="text-sm px-2 py-1 rounded bg-gray-100 hover:bg-gray-300 disabled:opacity-50"
+      title="Finalizar tarefa"
+    >
+      ✅
+    </button>
+
+    <button
+      @click="handleDelete(task.id)"
+      :disabled="task.isCompleted"
+      class="text-sm px-2 py-1 rounded bg-gray-100 hover:bg-gray-300 disabled:opacity-50"
+      title="Excluir tarefa"
+    >
+      🗑️
+    </button>
+
+    <button
+      :disabled="task.isCompleted"
+      class="text-sm px-2 py-1 rounded bg-gray-100 hover:bg-gray-300 disabled:opacity-50"
+      title="Atribuir usuário"
+    >
+      👤
+    </button>
+
+    <button
+      @click="handleEdit(task)"
+      :disabled="task.isCompleted"
+      class="text-sm px-2 py-1 rounded bg-gray-100 hover:bg-gray-300 disabled:opacity-50"
+      title="Editar tarefa"
+    >
+      ✏️
+    </button>
+  </div>
+</td>
+
         </tr>
       </tbody>
     </table>

@@ -1,6 +1,8 @@
 import axios from 'axios'
 
-const API = 'http://localhost:5000/api/v1/Task'
+
+const BASE_URL = import.meta.env.VITE_API_BASE_URL 
+const API = `${BASE_URL}/api/v1/Task`
 
 export function createTask(task) {
   return axios.post(API, task, {
