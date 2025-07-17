@@ -32,7 +32,8 @@ public static class ApiBootstrapper
 
         services.AddValidatorsFromAssemblyContaining<UserInputDtoValidator>();
         services.AddScoped<IJwtService, JwtService>();
-
+        services.AddHttpContextAccessor();
+        services.AddScoped<IUsuarioLogged, UsuarioLogged>();
         // Banco de dados SQLite
         var connectionString = configuration.GetConnectionString("DefaultConnection");
         services.AddRepository();

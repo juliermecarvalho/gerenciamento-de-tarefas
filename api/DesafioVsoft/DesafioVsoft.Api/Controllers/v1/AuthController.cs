@@ -26,21 +26,28 @@ public class LoginController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> Login([FromBody] LoginDto dto)
     {
-        if (dto.Email == "adm@adm.com")
-        {
-            var t = _jwtService.GenerateToken(new Domain.Entities.User
-            {
-                Id = Guid.NewGuid(),
-                Name = "Administrador",
-                Email = dto.Email,
-                Password = dto.Password
-            });
-            return Ok(new { Token = t });
-        }
+
         var users = await _userRepository.GetAllAsync(filter: f => f.Email == dto.Email);
         var user = users.FirstOrDefault();
         if (user is null || user.Password != dto.Password)
+        {
+            if (dto.Email == "adm@adm.com")
+            {
+                var admin = new Domain.Entities.User
+                {
+                    Id = Guid.NewGuid(),
+                    Name = "Administrador",
+                    Email = dto.Email,
+                    Password = dto.Password
+                };
+                await _userRepository.AddOrUpdateAsync(admin);
+
+                var t = _jwtService.GenerateToken(admin);
+                return Ok(new { Token = t });
+            }
+
             return Unauthorized("Credenciais inválidas.");
+        }
 
         var token = _jwtService.GenerateToken(user);
         return Ok(new { Token = token });

@@ -1,5 +1,6 @@
 ﻿using DesafioVsoft.Api.Dtos;
 using DesafioVsoft.Api.Mappers;
+using DesafioVsoft.Api.Services;
 using DesafioVsoft.Domain.Entities;
 using DesafioVsoft.Domain.Repositories;
 using Microsoft.AspNetCore.Authorization;
@@ -8,6 +9,7 @@ using System.Text;
 
 namespace DesafioVsoft.Api.Controllers;
 
+[Authorize]
 [ApiVersion("1.0")]
 [ApiController]
 [Route("api/v{version:apiVersion}/[controller]")]
@@ -77,8 +79,7 @@ public class UserController : ControllerBase
 
     /// <summary>
     /// Cria múltiplos usuários aleatórios com base em uma máscara
-    /// </summary>
-    [Authorize]
+    /// </summary>    
     [HttpPost("createRandom")]
     public async Task<ActionResult> CreateRandomUsers([FromBody] UserBatchInputDto dto)
     {

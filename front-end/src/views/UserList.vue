@@ -1,6 +1,6 @@
 <script setup>
 import { ref, onMounted } from "vue";
-import { getUsers, deleteUser } from "../services/userService";
+import { getUsers, deleteUser, createRandomUsers } from "../services/userService";
 import { useRouter } from "vue-router";
 
 const users = ref([]);
@@ -30,20 +30,38 @@ function handleEdit(user) {
   router.push({ path: "/users/create", query: { id: user.id } });
 }
 
+async function handleGenerateUsers() {
+  try {
+    await createRandomUsers(10);
+    await loadUsers();
+  } catch {
+    error.value = "Erro ao gerar usuários aleatórios";
+  }
+}
+
 onMounted(loadUsers);
 </script>
 
+
 <template>
   <div class="max-w-4xl mx-auto mt-8 p-6 bg-white rounded shadow">
-    <div class="flex justify-between items-center mb-4">
-      <h1 class="text-2xl font-bold">Lista de Usuários</h1>
-      <button
-        @click="router.push('/users/create')"
-        class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
-      >
-        Novo Usuário
-      </button>
-    </div>
+  <div class="flex justify-between items-center mb-4">
+  <h1 class="text-2xl font-bold">Lista de Usuários</h1>
+  <div class="flex space-x-2">
+    <button
+      @click="router.push('/users/create')"
+      class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
+    >
+      Novo Usuário
+    </button>
+    <button
+      @click="handleGenerateUsers"
+      class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+    >
+      Gerar 10 Usuários
+    </button>
+  </div>
+</div>
 
     <p v-if="loading">Carregando...</p>
     <p v-if="error" class="text-red-500">{{ error }}</p>

@@ -1,14 +1,17 @@
 using DesafioVsoft.Api.Dtos;
 using DesafioVsoft.Api.Mapping;
+using DesafioVsoft.Api.Services;
 using DesafioVsoft.Domain.RabbitMq;
 using DesafioVsoft.Domain.Repositories;
 using DesafioVsoft.Infrastructure;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 
 namespace DesafioVsoft.Api.Controllers.v1;
 
+[Authorize]
 [ApiVersion("1.0")]
 [ApiController]
 [Route("api/v{version:apiVersion}/[controller]")]
@@ -42,9 +45,10 @@ public class TaskController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<ActionResult> Create([FromBody] TaskInputDto dto)
+    public async Task<ActionResult> Create([FromBody] TaskInputDto dto, [FromServices] IUsuarioLogged usuarioLogged)
     {
         var task = TaskMapper.ToEntity(dto);
+        task.UserId = usuarioLogged.Id;
         await _taskRepository.AddOrUpdateAsync(task);
         return CreatedAtAction(nameof(GetById), new { id = task.Id }, null);
     }

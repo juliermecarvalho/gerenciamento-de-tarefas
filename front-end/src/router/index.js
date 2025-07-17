@@ -21,7 +21,6 @@ const router = createRouter({
 })
 
 router.beforeEach((to, from, next) => {
-  debugger
   const requiresAuth = to.matched.some(record => record.meta.requiresAuth)
   const token = getToken()
   const isValid = !!decodeToken() // se conseguir decodificar, assume que está OK
