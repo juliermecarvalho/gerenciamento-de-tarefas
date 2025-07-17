@@ -16,7 +16,7 @@ public static class TaskMapper
         task.Title = dto.Title;
         task.Description = dto.Description;
         task.IsCompleted = dto.IsCompleted;
-        task.UserId = dto.UserId;
+
     }
 
     public static TaskOutputDto ToDto(TaskItem task) => new()

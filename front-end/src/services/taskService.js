@@ -45,3 +45,20 @@ export function getTaskById(id) {
     }
   }).then(res => res.data)
 }
+
+export async function assignUserToTask(taskId, userId) {
+  const response = await fetch(`${API}/assign`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-api-version': '1.0'
+    },
+    body: JSON.stringify({ taskId, userId })
+  });
+debugger;
+  if (!response.ok) {
+    throw new Error('Erro ao atribuir usuário à tarefa');
+  }
+
+  return await response.ok;
+}

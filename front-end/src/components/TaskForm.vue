@@ -5,6 +5,7 @@ import { useForm, useField } from 'vee-validate'
 import { z } from 'zod'
 import { toTypedSchema } from '@vee-validate/zod'
 import { createTask, updateTask } from '../services/taskService'
+import { getUsers } from '../services/userService'
 
 const props = defineProps({
   initialTask: {
@@ -19,7 +20,6 @@ const router = useRouter()
 const schema = z.object({
   title: z.string().min(1, 'Título obrigatório'),
   description: z.string().min(1, 'Descrição obrigatória'),
-  userId: z.string().uuid('ID inválido').optional().or(z.literal('')),
   isCompleted: z.boolean().optional().default(false),
 })
 
@@ -29,18 +29,31 @@ const { handleSubmit } = useForm({
 
 const { value: title, errorMessage: titleError } = useField('title')
 const { value: description, errorMessage: descriptionError } = useField('description')
-const { value: userId, errorMessage: userIdError } = useField('userId')
 const { value: isCompleted } = useField('isCompleted')
 
 const isSaving = ref(false)
 const message = ref('')
 const messageType = ref('')
 
+const users = ref([])
+const responsibleName = ref('')
+
+onMounted(async () => {
+  if (props.initialTask?.userId) {
+    try {
+      users.value = await getUsers()
+      const responsible = users.value.find(u => u.id === props.initialTask.userId)
+      responsibleName.value = responsible?.name ?? 'Nenhum responsável'
+    } catch (err) {
+      console.error('Erro ao carregar usuários:', err)
+    }
+  }
+})
+
 watchEffect(() => {
   if (props.initialTask) {
     title.value = props.initialTask.title || ''
     description.value = props.initialTask.description || ''
-    userId.value = props.initialTask.userId || ''
     isCompleted.value = props.initialTask.isCompleted || false
   }
 })
@@ -52,7 +65,6 @@ const onSubmit = handleSubmit(async (values) => {
 
   try {
     const payload = { ...values }
-    if (!payload.userId) delete payload.userId
 
     if (props.initialTask?.id) {
       await updateTask(props.initialTask.id, payload)
@@ -87,10 +99,12 @@ const onSubmit = handleSubmit(async (values) => {
       <span class="text-red-500 text-sm">{{ descriptionError }}</span>
     </div>
 
-    <div>
-      <label class="block font-medium">ID do Usuário</label>
-      <input v-model="userId" class="w-full p-2 border rounded" />
-      <span class="text-red-500 text-sm">{{ userIdError }}</span>
+    <!-- Apenas para edição -->
+    <div v-if="props.initialTask">
+      <label class="block font-medium">Responsável</label>
+      <p class="p-2 border rounded bg-gray-50 text-gray-700">
+        {{ responsibleName || 'Nenhum responsável' }}
+      </p>
     </div>
 
     <div>

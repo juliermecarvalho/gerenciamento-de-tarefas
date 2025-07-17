@@ -35,6 +35,7 @@
 
 	<ItemGroup>
 		<ProjectReference Include="..\DesafioVsoft.Domain\DesafioVsoft.Domain.csproj" />
+		<ProjectReference Include="..\DesafioVsoft.Infrastructure\DesafioVsoft.Infrastructure.csproj" />
 		<ProjectReference Include="..\DesafioVsoft.Migrations\DesafioVsoft.Migrations.csproj" />
 		<ProjectReference Include="..\DesafioVsoft.Repository\DesafioVsoft.Repository.csproj" />
 	</ItemGroup>

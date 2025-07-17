@@ -4,10 +4,7 @@ using DesafioVsoft.Repository.Repositories;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 
-
 namespace DesafioVsoft.Repository;
-
-
 
 /// <summary>
 /// Classe responsável por registrar as dependências do repositório
@@ -19,13 +16,13 @@ public static class Bootstrapper
     /// </summary>
     /// <param name="services">Container de serviços</param>
     /// <param name="connectionString">String de conexão do banco SQLite</param>
-    public static void AddInfrastructure(this IServiceCollection services, string connectionString)
+    public static void AddRepository(this IServiceCollection services)
     {
         var temp = Path.GetTempPath();
         string migrationsPath = Path.Combine(temp, "DesafioVsoft.Migrations");
         Directory.CreateDirectory(migrationsPath);
         var database = Path.Combine(migrationsPath, "database.db");
-        connectionString = $"Data Source={database}";
+        var connectionString = $"Data Source={database}";
         // Configurar o contexto
         var optionsBuilder = new DbContextOptionsBuilder<AppDbContext>();
         optionsBuilder.UseSqlite(connectionString, b =>

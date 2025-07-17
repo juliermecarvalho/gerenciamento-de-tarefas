@@ -1,4 +1,5 @@
 ﻿using DesafioVsoft.Api.Validators;
+using DesafioVsoft.Infrastructure;
 using DesafioVsoft.Repository;
 using DesafioVsoft.Repository.Data;
 using FluentValidation;
@@ -33,7 +34,8 @@ public static class ApiBootstrapper
 
         // Banco de dados SQLite
         var connectionString = configuration.GetConnectionString("DefaultConnection");
-        services.AddInfrastructure(connectionString);
+        services.AddRepository();
+        services.AddInfrastructure();
 
         // Swagger com versionamento
         services.AddEndpointsApiExplorer();

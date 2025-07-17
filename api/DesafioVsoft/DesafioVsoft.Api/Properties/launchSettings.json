@@ -10,8 +10,25 @@
       },
       "publishAllPorts": true,
       "useSSL": true
+    },
+    "Container (fix)": {
+      "commandName": "Docker",
+      "launchBrowser": true,
+      "launchUrl": "https://localhost:5051/swagger", // Porta fixa HTTPS
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "ASPNETCORE_URLS": "https://+:5051;http://+:5050",
+        "RabbitMQ:HostName": "rabbitmq",
+        "RabbitMQ:UserName": "guest",
+        "RabbitMQ:Password": "guest",
+        "RabbitMQ:VirtualHost": "/"
+      },
+      "httpPort": 5050,
+      "sslPort": 5051,
+      "useSSL": true
     }
   },
+
   "$schema": "http://json.schemastore.org/launchsettings.json",
   "iisSettings": {
     "windowsAuthentication": false,

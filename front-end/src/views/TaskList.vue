@@ -1,12 +1,23 @@
 <script setup>
 import { onMounted, ref } from "vue";
 import { useRouter } from "vue-router";
-import { getTasks, deleteTask, updateTask } from "../services/taskService";
+import {
+  getTasks,
+  deleteTask,
+  updateTask,
+  assignUserToTask,
+} from "../services/taskService";
+import { getUsers } from "../services/userService";
 
 const router = useRouter();
 const tasks = ref([]);
+const users = ref([]);
 const loading = ref(true);
 const error = ref(null);
+
+const showModal = ref(false);
+const selectedTask = ref(null);
+const selectedUserId = ref("");
 
 async function loadTasks() {
   loading.value = true;
@@ -18,6 +29,42 @@ async function loadTasks() {
   } finally {
     loading.value = false;
   }
+}
+
+async function loadUsers() {
+  try {
+    users.value = await getUsers();
+  } catch (err) {
+    console.error("Erro ao carregar usuários", err);
+  }
+}
+
+function openAssignModal(task) {
+  selectedTask.value = task;
+  selectedUserId.value = task.userId || "";
+  showModal.value = true;
+  loadUsers();
+}
+
+async function confirmAssign() {
+  if (!selectedTask.value) return;
+
+  try {
+    await assignUserToTask(selectedTask.value.id, selectedUserId.value);
+    showModal.value = false;
+    selectedTask.value = null;
+    selectedUserId.value = "";
+    await loadTasks();
+  } catch (err) {
+    console.error("Erro ao atribuir usuário:", err);
+    alert("Erro ao atribuir usuário à tarefa.");
+  }
+}
+
+function closeModal() {
+  showModal.value = false;
+  selectedTask.value = null;
+  selectedUserId.value = "";
 }
 
 async function handleDelete(id) {
@@ -54,6 +101,7 @@ onMounted(loadTasks);
         Nova Tarefa
       </button>
     </div>
+
     <p v-if="loading">Carregando...</p>
     <p v-if="error" class="text-red-500">{{ error }}</p>
 
@@ -79,49 +127,82 @@ onMounted(loadTasks);
               {{ task.isCompleted ? "Concluída" : "Pendente" }}
             </span>
           </td>
-       <td class="p-2 border text-center">
-  <div class="flex justify-center space-x-2">
-    <button
-      @click="handleComplete(task)"
-      :disabled="task.isCompleted"
-      class="text-sm px-2 py-1 rounded bg-gray-100 hover:bg-gray-300 disabled:opacity-50"
-      title="Finalizar tarefa"
-    >
-      ✅
-    </button>
+          <td class="p-2 border text-center">
+            <div class="flex justify-center space-x-2">
+              <button
+                @click="handleComplete(task)"
+                :disabled="task.isCompleted"
+                class="text-sm px-2 py-1 rounded bg-gray-100 hover:bg-gray-300 disabled:opacity-50"
+                title="Finalizar tarefa"
+              >
+                ✅
+              </button>
 
-    <button
-      @click="handleDelete(task.id)"
-      :disabled="task.isCompleted"
-      class="text-sm px-2 py-1 rounded bg-gray-100 hover:bg-gray-300 disabled:opacity-50"
-      title="Excluir tarefa"
-    >
-      🗑️
-    </button>
+              <button
+                @click="handleDelete(task.id)"
+                :disabled="task.isCompleted"
+                class="text-sm px-2 py-1 rounded bg-gray-100 hover:bg-gray-300 disabled:opacity-50"
+                title="Excluir tarefa"
+              >
+                🗑️
+              </button>
 
-    <button
-      :disabled="task.isCompleted"
-      class="text-sm px-2 py-1 rounded bg-gray-100 hover:bg-gray-300 disabled:opacity-50"
-      title="Atribuir usuário"
-    >
-      👤
-    </button>
+              <button
+                @click="openAssignModal(task)"
+                :disabled="task.isCompleted"
+                class="text-sm px-2 py-1 rounded bg-gray-100 hover:bg-gray-300 disabled:opacity-50"
+                title="Atribuir usuário"
+              >
+                👤
+              </button>
 
-    <button
-      @click="handleEdit(task)"
-      :disabled="task.isCompleted"
-      class="text-sm px-2 py-1 rounded bg-gray-100 hover:bg-gray-300 disabled:opacity-50"
-      title="Editar tarefa"
-    >
-      ✏️
-    </button>
-  </div>
-</td>
-
+              <button
+                @click="handleEdit(task)"
+                :disabled="task.isCompleted"
+                class="text-sm px-2 py-1 rounded bg-gray-100 hover:bg-gray-300 disabled:opacity-50"
+                title="Editar tarefa"
+              >
+                ✏️
+              </button>
+            </div>
+          </td>
         </tr>
       </tbody>
     </table>
 
     <p v-else-if="!loading">Nenhuma tarefa encontrada.</p>
+
+    <!-- Modal de atribuição -->
+    <div
+      v-if="showModal"
+      class="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50"
+    >
+      <div class="bg-white p-6 rounded shadow w-full max-w-sm">
+        <h2 class="text-lg font-bold mb-4">Atribuir Usuário</h2>
+
+        <label class="block mb-2">Selecione um usuário:</label>
+        <select v-model="selectedUserId" class="w-full p-2 border rounded mb-4">
+          <option value="">Nenhum responsável</option>
+          <option v-for="user in users" :key="user.id" :value="user.id">
+            {{ user.name }}
+          </option>
+        </select>
+
+        <div class="flex justify-end space-x-2">
+          <button
+            @click="closeModal"
+            class="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400"
+          >
+            Cancelar
+          </button>
+          <button
+            @click="confirmAssign"
+            class="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
+          >
+            Confirmar
+          </button>
+        </div>
+      </div>
+    </div>
   </div>
 </template>

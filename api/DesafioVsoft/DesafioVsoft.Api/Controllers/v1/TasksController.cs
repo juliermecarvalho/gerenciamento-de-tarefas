@@ -1,6 +1,8 @@
 using DesafioVsoft.Api.Dtos;
 using DesafioVsoft.Api.Mapping;
+using DesafioVsoft.Domain.RabbitMq;
 using DesafioVsoft.Domain.Repositories;
+using DesafioVsoft.Infrastructure;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -56,6 +58,8 @@ public class TaskController : ControllerBase
 
         TaskMapper.UpdateEntity(task, dto);
         await _taskRepository.AddOrUpdateAsync(task);
+
+
         return NoContent();
     }
 
@@ -71,7 +75,7 @@ public class TaskController : ControllerBase
     }
 
     [HttpPost("assign")]
-    public async Task<ActionResult> AssignTaskToUser([FromBody] TaskAssignDto dto)
+    public async Task<ActionResult> AssignTaskToUser([FromBody] TaskAssignDto dto, [FromServices] IRabbitMqProducer rabbitMqProducer)
     {
         var task = await _taskRepository.GetByIdAsync(dto.TaskId);
         if (task is null)
@@ -83,6 +87,9 @@ public class TaskController : ControllerBase
 
         task.UserId = dto.UserId;
         await _taskRepository.AddOrUpdateAsync(task);
+
+
+        await rabbitMqProducer.PublishUserChangedAsync(dto.UserId);
 
         return Ok("Tarefa atribuída com sucesso.");
     }
