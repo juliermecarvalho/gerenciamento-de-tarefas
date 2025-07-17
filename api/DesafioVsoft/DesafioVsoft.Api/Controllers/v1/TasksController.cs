@@ -45,11 +45,12 @@ public class TaskController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<ActionResult> Create([FromBody] TaskInputDto dto, [FromServices] IUsuarioLogged usuarioLogged)
+    public async Task<ActionResult> Create([FromBody] TaskInputDto dto, [FromServices] IUsuarioLogged usuarioLogged, [FromServices] IRabbitMqProducer rabbitMqProducer)
     {
         var task = TaskMapper.ToEntity(dto);
         task.UserId = usuarioLogged.Id;
         await _taskRepository.AddOrUpdateAsync(task);
+        await rabbitMqProducer.PublishUserChangedAsync(usuarioLogged.Id, task.Id);
         return CreatedAtAction(nameof(GetById), new { id = task.Id }, null);
     }
 
