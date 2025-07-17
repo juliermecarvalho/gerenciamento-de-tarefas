@@ -1,5 +1,6 @@
 ﻿using DesafioVsoft.Domain.RabbitMq;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 using RabbitMQ.Client;
 using System.Text;
 using System.Text.Json;
@@ -14,31 +15,24 @@ public class RabbitMqProducer : IRabbitMqProducer
 
     public RabbitMqProducer(IConfiguration config)
     {
-        try
+
+        var factory = new ConnectionFactory()
         {
-            var factory = new ConnectionFactory()
-            {
-                HostName = config["RabbitMQ:HostName"] ?? "localhost",
-                UserName = config["RabbitMQ:UserName"] ?? "guest",
-                Password = config["RabbitMQ:Password"] ?? "guest"
-            };
+            HostName = config["RabbitMQ:HostName"] ?? "localhost",
+            UserName = config["RabbitMQ:UserName"] ?? "guest",
+            Password = config["RabbitMQ:Password"] ?? "guest"
+        };
 
 
-            _connection = factory.CreateConnectionAsync().GetAwaiter().GetResult();
-            _channel = _connection.CreateChannelAsync().GetAwaiter().GetResult();
+        _connection = factory.CreateConnectionAsync().GetAwaiter().GetResult();
+        _channel = _connection.CreateChannelAsync().GetAwaiter().GetResult();
 
-            _channel.QueueDeclareAsync(queue: _queueName,
-                                  durable: true,
-                                  exclusive: false,
-                                  autoDelete: false,
-                                  arguments: null).GetAwaiter().GetResult();
-        }
-        catch (Exception)
-        {
-#if !DEBUG
-            throw;
-#endif
-        }
+        _channel.QueueDeclareAsync(queue: _queueName,
+                              durable: true,
+                              exclusive: false,
+                              autoDelete: false,
+                              arguments: null).GetAwaiter().GetResult();
+
     }
 
     public Task PublishUserChangedAsync(Guid userId)
@@ -55,4 +49,7 @@ public class RabbitMqProducer : IRabbitMqProducer
 
         return Task.CompletedTask;
     }
+
+
 }
+

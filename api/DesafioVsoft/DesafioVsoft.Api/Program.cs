@@ -1,5 +1,7 @@
 ﻿using DesafioVsoft.Api.Extensions;
+using DesafioVsoft.Domain.RabbitMq;
 using Microsoft.Extensions.Configuration;
+using System.Threading.Channels;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -20,6 +22,7 @@ builder.Configuration
     .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
     .AddJsonFile($"appsettings.{builder.Environment.EnvironmentName}.json", optional: true)
     .AddEnvironmentVariables();
+
 
 
 // Registra serviços
