@@ -14,6 +14,7 @@ Sistema Fullstack para cadastro e gerenciamento de tarefas com usuários, utiliz
 
 ```bash
 docker compose up --build
+docker compose up -d
 ```
 
 Acesse:
