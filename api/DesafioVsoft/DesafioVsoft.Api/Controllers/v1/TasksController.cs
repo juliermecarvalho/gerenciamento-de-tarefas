@@ -50,7 +50,7 @@ public class TaskController : ControllerBase
         var task = TaskMapper.ToEntity(dto);
         task.UserId = usuarioLogged.Id;
         await _taskRepository.AddOrUpdateAsync(task);
-        await rabbitMqProducer.PublishUserChangedAsync(usuarioLogged.Id, task.Id);
+        await rabbitMqProducer.PublishUserChangedAsync("Tarefa crianda com sucesso!!!");
         return CreatedAtAction(nameof(GetById), new { id = task.Id }, null);
     }
 
@@ -86,15 +86,15 @@ public class TaskController : ControllerBase
         if (task is null)
             return NotFound("Tarefa não encontrada");
 
-        var exist = await _userRepository.AnyAsync(dto.UserId);
-        if (!exist)
+        var user = await _userRepository.GetByIdAsync(dto.UserId);
+        if (user is null)
             return NotFound("Usuário não encontrado");
 
         task.UserId = dto.UserId;
         await _taskRepository.AddOrUpdateAsync(task);
 
 
-        await rabbitMqProducer.PublishUserChangedAsync(dto.UserId, dto.TaskId);
+        await rabbitMqProducer.PublishUserChangedAsync($"Tarefa atribuída a {user.Name} com sucesso!!!");
 
         return Ok("Tarefa atribuída com sucesso.");
     }

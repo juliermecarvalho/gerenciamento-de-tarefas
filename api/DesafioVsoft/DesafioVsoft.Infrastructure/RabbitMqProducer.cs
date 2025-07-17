@@ -1,9 +1,8 @@
 ﻿using DesafioVsoft.Domain.RabbitMq;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Logging;
 using RabbitMQ.Client;
 using System.Text;
-using System.Text.Json;
+
 
 namespace DesafioVsoft.Infrastructure;
 
@@ -35,9 +34,8 @@ public class RabbitMqProducer : IRabbitMqProducer
 
     }
 
-    public Task PublishUserChangedAsync(Guid userId, Guid taskId)
+    public Task PublishUserChangedAsync(string message)
     {
-        var message = JsonSerializer.Serialize(new { userId, taskId });
         var body = Encoding.UTF8.GetBytes(message);
 
         var props = new BasicProperties();
@@ -56,7 +54,7 @@ public class RabbitMqProducer : IRabbitMqProducer
 
 public class RabbitFacke : IRabbitMqProducer
 {
-    Task IRabbitMqProducer.PublishUserChangedAsync(Guid userId, Guid taskId)
+    Task IRabbitMqProducer.PublishUserChangedAsync(string message)
     {
         return Task.CompletedTask;
     }

@@ -8,5 +8,5 @@ namespace DesafioVsoft.Domain.RabbitMq;
 
 public interface IRabbitMqProducer
 {
-    Task PublishUserChangedAsync(Guid userId, Guid taskId);
+    Task PublishUserChangedAsync(string message);
 }
