@@ -89,7 +89,7 @@ public class TaskController : ControllerBase
         await _taskRepository.AddOrUpdateAsync(task);
 
 
-        await rabbitMqProducer.PublishUserChangedAsync(dto.UserId);
+        await rabbitMqProducer.PublishUserChangedAsync(dto.UserId, dto.TaskId);
 
         return Ok("Tarefa atribuída com sucesso.");
     }

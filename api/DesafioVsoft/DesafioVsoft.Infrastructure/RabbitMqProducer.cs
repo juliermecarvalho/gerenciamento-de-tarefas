@@ -35,9 +35,9 @@ public class RabbitMqProducer : IRabbitMqProducer
 
     }
 
-    public Task PublishUserChangedAsync(Guid userId)
+    public Task PublishUserChangedAsync(Guid userId, Guid taskId)
     {
-        var message = JsonSerializer.Serialize(new { id = userId });
+        var message = JsonSerializer.Serialize(new { userId, taskId });
         var body = Encoding.UTF8.GetBytes(message);
 
         var props = new BasicProperties();
@@ -53,3 +53,11 @@ public class RabbitMqProducer : IRabbitMqProducer
 
 }
 
+
+public class RabbitFacke : IRabbitMqProducer
+{
+    Task IRabbitMqProducer.PublishUserChangedAsync(Guid userId, Guid taskId)
+    {
+        return Task.CompletedTask;
+    }
+}

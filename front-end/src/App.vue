@@ -1,19 +1,24 @@
 <template>
   <div>
-    <!-- Navegação -->
-    <nav class="bg-gray-100 p-4 flex space-x-4">
-      <router-link to="/tasks" class="text-blue-600 hover:underline"
-        >Tarefas</router-link
-      >
-   
-      <router-link to="/users" class="text-blue-600 hover:underline"
-        >Usuários</router-link
-      >
+    <!-- Navegação (somente com token válido) -->
+    <nav
+      v-if="userName"
+      class="bg-gray-100 p-4 flex justify-between items-center space-x-4"
+    >
+      <div class="flex space-x-4">
+        <router-link to="/tasks" class="text-blue-600 hover:underline"
+          >Tarefas</router-link
+        >
+        <router-link to="/users" class="text-blue-600 hover:underline"
+          >Usuários</router-link
+        >
+      </div>
+      <span class="text-gray-700 font-medium">Bem-vindo, {{ userName }}</span>
     </nav>
 
-    <!-- Notificações -->
+    <!-- Notificações (somente com token válido) -->
     <div
-      v-if="notifications.length > 0"
+      v-if="userName && notifications.length > 0"
       class="fixed top-4 right-4 z-50 w-80 space-y-2"
     >
       <div
@@ -30,32 +35,39 @@
   </div>
 </template>
 
-<script setup lang="ts">
-import { onMounted, onBeforeUnmount, ref } from "vue";
+<script setup>
+import { onMounted, onBeforeUnmount, ref } from "vue"
+import { decodeToken } from "./services/authService" // ajuste o caminho se necessário
 
-const notifications = ref<string[]>([]);
-let eventSource: EventSource;
+const notifications = ref([])
+const userName = ref("")
+let eventSource = null
 
 onMounted(() => {
-  const BASE_URL = import.meta.env.VITE_API_BASE_URL;
-  const API = `${BASE_URL}/api/v1/Notification/stream`;
-  eventSource = new EventSource(API);
-  debugger;
-  eventSource.onmessage = (event) => {
-    notifications.value.push(event.data);
-    // Remover notificação automaticamente após 5s
-    setTimeout(() => {
-      notifications.value.shift();
-    }, 5000);
-  };
+  const user = decodeToken()
+  if (user && user.name) {
+    userName.value = user.name
 
-  eventSource.onerror = (error) => {
-    console.error("SSE Error:", error);
-    eventSource.close();
-  };
-});
+    // Abrir conexão SSE
+    const BASE_URL = import.meta.env.VITE_API_BASE_URL
+    const API = `${BASE_URL}/api/v1/Notification/stream`
+    eventSource = new EventSource(API)
+
+    eventSource.onmessage = (event) => {
+      notifications.value.push(event.data)
+      setTimeout(() => {
+        notifications.value.shift()
+      }, 5000)
+    }
+
+    eventSource.onerror = (error) => {
+      console.error("SSE Error:", error)
+      eventSource.close()
+    }
+  }
+})
 
 onBeforeUnmount(() => {
-  eventSource?.close();
-});
+  eventSource?.close()
+})
 </script>

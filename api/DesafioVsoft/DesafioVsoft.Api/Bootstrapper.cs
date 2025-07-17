@@ -1,4 +1,5 @@
-﻿using DesafioVsoft.Api.Validators;
+﻿using DesafioVsoft.Api.Services;
+using DesafioVsoft.Api.Validators;
 using DesafioVsoft.Infrastructure;
 using DesafioVsoft.Repository;
 using DesafioVsoft.Repository.Data;
@@ -30,7 +31,7 @@ public static class ApiBootstrapper
         services.AddFluentValidationClientsideAdapters();
 
         services.AddValidatorsFromAssemblyContaining<UserInputDtoValidator>();
-
+        services.AddScoped<IJwtService, JwtService>();
 
         // Banco de dados SQLite
         var connectionString = configuration.GetConnectionString("DefaultConnection");
