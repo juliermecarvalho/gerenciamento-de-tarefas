@@ -14,7 +14,8 @@ async function login() {
     const token = await loginRequest(email.value, password.value)
     const user = decodeToken(token)
     console.log("Usuário autenticado:", user)
-    router.push("/users")
+    //router.push("/users")
+    window.location = '/users' // Recarrega a página para aplicar o token
   } catch (err) {
     error.value = err.message
   }
