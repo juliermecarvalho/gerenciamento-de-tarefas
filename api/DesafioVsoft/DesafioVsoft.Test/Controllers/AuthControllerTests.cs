@@ -10,13 +10,13 @@ using System.Linq.Expressions;
 
 namespace DesafioVsoft.Tests.Controllers;
 
-public class LoginControllerTests
+public class AuthControllerTests
 {
     private readonly Mock<IUserRepository> _userRepositoryMock = new();
     private readonly Mock<IJwtService> _jwtServiceMock = new();
     private readonly LoginController _controller;
 
-    public LoginControllerTests()
+    public AuthControllerTests()
     {
         _controller = new LoginController(_userRepositoryMock.Object, _jwtServiceMock.Object);
     }
