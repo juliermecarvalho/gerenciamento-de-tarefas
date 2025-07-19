@@ -14,9 +14,8 @@ public static class Bootstrapper
     public static void AddInfrastructure(this IServiceCollection services)
     {
         services.AddScoped<IRabbitMqProducer, RabbitMqProducer>();
-#if !DEBUG
         services.AddSingleton(Channel.CreateUnbounded<string>());
         services.AddHostedService<RabbitMqConsumerService>();
-#endif
+
     }
 }

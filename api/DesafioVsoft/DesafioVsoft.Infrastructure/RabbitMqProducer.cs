@@ -51,11 +51,3 @@ public class RabbitMqProducer : IRabbitMqProducer
 
 }
 
-
-public class RabbitFacke : IRabbitMqProducer
-{
-    Task IRabbitMqProducer.PublishUserChangedAsync(string message)
-    {
-        return Task.CompletedTask;
-    }
-}
