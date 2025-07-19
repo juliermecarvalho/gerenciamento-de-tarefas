@@ -1,29 +1,39 @@
 <script setup>
-import { onMounted, ref } from "vue";
+import { onMounted, ref, computed } from "vue";
 import { useRouter } from "vue-router";
 import {
-  getTasks,
+  getTasksPaged,
   deleteTask,
   updateTask,
   assignUserToTask,
 } from "../services/taskService";
 import { getUsers } from "../services/userService";
+import { createRandomTasks } from "../services/taskService";
 
+const generatingTasks = ref(false);
 const router = useRouter();
 const tasks = ref([]);
 const users = ref([]);
 const loading = ref(true);
 const error = ref(null);
 
+const currentPage = ref(1);
+const totalRecords = ref(0);
+const pageSize = 10;
+
 const showModal = ref(false);
 const selectedTask = ref(null);
 const selectedUserId = ref("");
+
+const totalPages = computed(() => Math.ceil(totalRecords.value / pageSize));
 
 async function loadTasks() {
   loading.value = true;
   error.value = null;
   try {
-    tasks.value = await getTasks();
+    const data = await getTasksPaged(currentPage.value);
+    tasks.value = data.items;
+    totalRecords.value = data.totalRecords;
   } catch (err) {
     error.value = "Erro ao buscar tarefas";
   } finally {
@@ -51,9 +61,7 @@ async function confirmAssign() {
 
   try {
     await assignUserToTask(selectedTask.value.id, selectedUserId.value);
-    showModal.value = false;
-    selectedTask.value = null;
-    selectedUserId.value = "";
+    closeModal();
     await loadTasks();
   } catch (err) {
     console.error("Erro ao atribuir usuário:", err);
@@ -87,19 +95,56 @@ function handleEdit(task) {
   router.push({ name: "TaskCreate", query: { id: task.id } });
 }
 
+function nextPage() {
+  if (currentPage.value < totalPages.value) {
+    currentPage.value++;
+    loadTasks();
+  }
+}
+
+function prevPage() {
+  if (currentPage.value > 1) {
+    currentPage.value--;
+    loadTasks();
+  }
+}
+
+async function handleGenerateTasks() {
+  generatingTasks.value = true;
+  try {
+    await createRandomTasks();
+    currentPage.value = 1;
+    await loadTasks();
+  } catch (err) {
+    console.error("Erro ao gerar tarefas:", err);
+    alert("Erro ao gerar tarefas aleatórias.");
+  } finally {
+    generatingTasks.value = false;
+  }
+}
+
 onMounted(loadTasks);
 </script>
 
 <template>
   <div class="max-w-5xl mx-auto mt-8 p-6 bg-white rounded shadow">
     <div class="flex justify-between items-center mb-4">
-      <h1 class="text-2xl font-bold mb-4">Lista de Tarefas</h1>
-      <button
-        @click="router.push('/task/create')"
-        class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
-      >
-        Nova Tarefa
-      </button>
+      <h1 class="text-2xl font-bold">Lista de Tarefas</h1>
+      <div class="flex space-x-2">
+        <button
+          @click="router.push('/task/create')"
+          class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
+        >
+          Nova Tarefa
+        </button>
+        <button
+          @click="handleGenerateTasks"
+          :disabled="generatingTasks"
+          class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 disabled:opacity-50"
+        >
+          {{ generatingTasks ? "Gerando..." : "Gerar 1000 Tarefas" }}
+        </button>
+      </div>
     </div>
 
     <p v-if="loading">Carregando...</p>
@@ -171,6 +216,29 @@ onMounted(loadTasks);
     </table>
 
     <p v-else-if="!loading">Nenhuma tarefa encontrada.</p>
+
+    <!-- Paginação -->
+    <div v-if="totalPages > 1" class="mt-4 flex justify-center space-x-2">
+      <button
+        @click="prevPage"
+        :disabled="currentPage === 1"
+        class="px-4 py-2 bg-gray-200 rounded disabled:opacity-50"
+      >
+        ◀ Anterior
+      </button>
+
+      <span class="px-4 py-2 font-semibold">
+        Página {{ currentPage }} de {{ totalPages }}
+      </span>
+
+      <button
+        @click="nextPage"
+        :disabled="currentPage === totalPages"
+        class="px-4 py-2 bg-gray-200 rounded disabled:opacity-50"
+      >
+        Próxima ▶
+      </button>
+    </div>
 
     <!-- Modal de atribuição -->
     <div

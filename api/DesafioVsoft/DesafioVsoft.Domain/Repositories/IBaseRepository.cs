@@ -19,7 +19,7 @@ public interface IBaseRepository<T> where T : class, IEntity
     int page,
     Expression<Func<T, bool>>? filter = null,
     Func<IQueryable<T>, IOrderedQueryable<T>>? orderBy = null,
-    params Expression<Func<T, object>>[] includes);
+    params Func<IQueryable<T>, IQueryable<T>>[] includes);
 
     Task<T?> GetByIdAsync(Guid id);
 

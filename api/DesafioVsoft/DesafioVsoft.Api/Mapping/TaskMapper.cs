@@ -1,5 +1,7 @@
 ﻿using DesafioVsoft.Api.Dtos;
+using DesafioVsoft.Domain.Commons;
 using DesafioVsoft.Domain.Entities;
+using System.Threading.Tasks;
 
 namespace DesafioVsoft.Api.Mapping;
 
@@ -28,4 +30,15 @@ public static class TaskMapper
         UserId = task.UserId,
         Name = task.User?.Name
     };
+
+    public static Pagination<TaskOutputDto> ToDto(Pagination<TaskItem> pagination)
+    {
+        return new Pagination<TaskOutputDto>
+        {
+            PageNumber = pagination.PageNumber,
+            PageSize = pagination.PageSize,
+            TotalRecords = pagination.TotalRecords,
+            Items = pagination.Items.Select(ToDto).ToList()
+        };
+    }
 }

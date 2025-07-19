@@ -23,3 +23,11 @@ export function getTaskById(id) {
 export function assignUserToTask(taskId, userId) {
   return api.post('/Task/assign', { taskId, userId })
 }
+
+export function getTasksPaged(pageNumber = 1) {
+  return api.get(`/Task/paged?page-number=${pageNumber}`).then(res => res.data)
+}
+
+export function createRandomTasks() {
+  return api.post('/Task/createRandom')
+}

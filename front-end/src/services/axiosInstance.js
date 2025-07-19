@@ -6,7 +6,8 @@ const api = axios.create({
   baseURL: `${BASE_URL}/api/v1`,
   headers: {
     'Accept': 'application/json',
-    'x-api-version': '1.0'
+    'x-api-version': '1.0',
+    'Content-Type': 'application/json; charset=utf-8'
   }
 })
 

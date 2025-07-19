@@ -79,7 +79,7 @@ public class BaseRepository<T> : IBaseRepository<T> where T : class, IEntity
     int page,
     Expression<Func<T, bool>>? filter = null,
     Func<IQueryable<T>, IOrderedQueryable<T>>? orderBy = null,
-    params Expression<Func<T, object>>[] includes)
+    params Func<IQueryable<T>, IQueryable<T>>[] includes)
     {
 
         var query = _dbSet.AsQueryable();
@@ -91,11 +91,7 @@ public class BaseRepository<T> : IBaseRepository<T> where T : class, IEntity
 
         query = orderBy is not null ? orderBy(query) : query.OrderBy(q => q.Id);
 
-        query = includes
-            .Aggregate(
-                query,
-                (current, include) => current.Include(include.AsPath())
-            );
+        query = includes?.Aggregate(query, (current, include) => include(current));
 
         var listItens = await query
             .Skip(_totalDeRegistrosPorPagina * (page - 1))
