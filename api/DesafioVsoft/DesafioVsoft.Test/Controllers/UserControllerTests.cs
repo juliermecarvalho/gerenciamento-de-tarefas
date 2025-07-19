@@ -1,13 +1,10 @@
 ﻿using DesafioVsoft.Api.Controllers;
 using DesafioVsoft.Api.Dtos;
-using DesafioVsoft.Api.Mappers;
 using DesafioVsoft.Domain.Commons;
 using DesafioVsoft.Domain.Entities;
 using DesafioVsoft.Domain.Repositories;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
-using System.Linq.Expressions;
-using Xunit;
 
 namespace DesafioVsoft.Tests.Controllers;
 
@@ -65,7 +62,7 @@ public class UserControllerTests
             pageNumber,
             null,
             It.IsAny<Func<IQueryable<User>, IOrderedQueryable<User>>>(),
-            It.IsAny<Expression<Func<User, object>>[]>()
+            It.IsAny<Func<IQueryable<User>, IQueryable<User>>[]>()
         )).ReturnsAsync(pagination);
 
         // Act
