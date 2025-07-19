@@ -1,4 +1,5 @@
 ﻿using DesafioVsoft.Api.Dtos;
+using DesafioVsoft.Domain.Commons;
 using DesafioVsoft.Domain.Entities;
 
 namespace DesafioVsoft.Api.Mappers;
@@ -28,4 +29,17 @@ public static class UserMapper
         entity.Name = dto.Name;
         entity.Email = dto.Email;
     }
+
+    public static Pagination<UserOutputDto> ToDto(Pagination<User> pagination)
+    {
+        return new Pagination<UserOutputDto>
+        {
+            PageNumber = pagination.PageNumber,
+            PageSize = pagination.PageSize,
+            TotalRecords = pagination.TotalRecords,
+            Items = pagination.Items.Select(ToDto).ToList()
+        };
+    }
+
+
 }

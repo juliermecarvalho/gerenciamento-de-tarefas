@@ -22,3 +22,7 @@ export function createRandomUsers(amount = 1000, userNameMask = "user_{{random}}
     userNameMask
   })
 }
+
+export function getUsersPaged(pageNumber = 1) {
+  return api.get(`/User/paged?page-number=${pageNumber}`).then(res => res.data)
+}

@@ -1,6 +1,7 @@
 ﻿using DesafioVsoft.Api.Controllers;
 using DesafioVsoft.Api.Dtos;
 using DesafioVsoft.Api.Mappers;
+using DesafioVsoft.Domain.Commons;
 using DesafioVsoft.Domain.Entities;
 using DesafioVsoft.Domain.Repositories;
 using Microsoft.AspNetCore.Mvc;
@@ -27,7 +28,7 @@ public class UserControllerTests
         var users = new List<User> { new() { Id = Guid.NewGuid(), Name = "Usuário Teste" } };
         _userRepositoryMock.Setup(r => r.GetAllAsync(
           null,
-          null,
+          It.IsAny<Func<IQueryable<User>, IOrderedQueryable<User>>>(),
           true,
           It.IsAny<Func<IQueryable<User>, IQueryable<User>>[]>()
           )).ReturnsAsync(users);
@@ -39,6 +40,42 @@ public class UserControllerTests
         var okResult = Assert.IsType<OkObjectResult>(result.Result);
         var returned = Assert.IsAssignableFrom<List<UserOutputDto>>(okResult.Value);
         Assert.Single(returned);
+    }
+
+    [Fact]
+    public async Task GetPaged_ShouldReturnPagedUsers()
+    {
+        // Arrange
+        int pageNumber = 1;
+        var users = new List<User>
+        {
+            new() { Id = Guid.NewGuid(), Name = "Ana", Email = "ana@email.com" },
+            new() { Id = Guid.NewGuid(), Name = "Bruno", Email = "bruno@email.com" }
+        };
+
+        var pagination = new Pagination<User>
+        {
+            PageNumber = pageNumber,
+            PageSize = 10,
+            TotalRecords = 2,
+            Items = users
+        };
+
+        _userRepositoryMock.Setup(r => r.GetPaginationAsync(
+            pageNumber,
+            null,
+            It.IsAny<Func<IQueryable<User>, IOrderedQueryable<User>>>(),
+            It.IsAny<Expression<Func<User, object>>[]>()
+        )).ReturnsAsync(pagination);
+
+        // Act
+        var result = await _controller.GetPaged(pageNumber);
+
+        // Assert
+        var okResult = Assert.IsType<OkObjectResult>(result.Result);
+        var paginationDto = Assert.IsType<Pagination<UserOutputDto>>(okResult.Value);
+        Assert.Equal(2, paginationDto.Items.Count);
+        Assert.All(paginationDto.Items, item => Assert.IsType<UserOutputDto>(item));
     }
 
     [Fact]

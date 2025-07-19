@@ -1,6 +1,7 @@
 ﻿using DesafioVsoft.Api.Dtos;
 using DesafioVsoft.Api.Mappers;
 using DesafioVsoft.Api.Services;
+using DesafioVsoft.Domain.Commons;
 using DesafioVsoft.Domain.Entities;
 using DesafioVsoft.Domain.Repositories;
 using Microsoft.AspNetCore.Authorization;
@@ -26,9 +27,17 @@ public class UserController : ControllerBase
     [HttpGet]
     public async Task<ActionResult<List<UserOutputDto>>> GetAll()
     {
-        var users = await _userRepository.GetAllAsync();
+        var users = await _userRepository.GetAllAsync(orderBy: o => o.OrderBy(x => x.Name));
         var result = users.Select(UserMapper.ToDto).ToList();
         return Ok(result);
+    }
+
+    [HttpGet("paged")]
+    public async Task<ActionResult<Pagination<UserOutputDto>>> GetPaged([FromQuery(Name = "page-number")] int pageNumber)
+    {
+        var paginationUsers = await _userRepository.GetPaginationAsync(page: pageNumber, orderBy: o => o.OrderBy(x => x.Name));
+
+        return Ok(UserMapper.ToDto(paginationUsers));
     }
 
 

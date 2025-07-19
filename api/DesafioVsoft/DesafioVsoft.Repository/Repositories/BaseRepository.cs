@@ -1,4 +1,5 @@
-﻿using DesafioVsoft.Domain.Entities;
+﻿using DesafioVsoft.Domain.Commons;
+using DesafioVsoft.Domain.Entities;
 using DesafioVsoft.Domain.Repositories;
 using DesafioVsoft.Repository.Data;
 using Microsoft.EntityFrameworkCore;
@@ -12,6 +13,7 @@ public class BaseRepository<T> : IBaseRepository<T> where T : class, IEntity
 {
     protected readonly AppDbContext _context;
     protected readonly DbSet<T> _dbSet;
+    private readonly int _totalDeRegistrosPorPagina = 10;
 
     public BaseRepository(AppDbContext context)
     {
@@ -52,18 +54,18 @@ public class BaseRepository<T> : IBaseRepository<T> where T : class, IEntity
     }
 
     public async Task<IEnumerable<T>> GetAllAsync(
-        Expression<Func<T, bool>>? filtro = null,
-        Func<IQueryable<T>, IOrderedQueryable<T>>? ordenarPor = null,
+        Expression<Func<T, bool>>? filter = null,
+        Func<IQueryable<T>, IOrderedQueryable<T>>? orderBy = null,
         bool asNoTracking = true,
         params Func<IQueryable<T>, IQueryable<T>>[]? includes)
     {
         var query = _dbSet.AsQueryable();
-        if (filtro is not null)
+        if (filter is not null)
         {
-            query = query.Where(filtro);
+            query = query.Where(filter);
         }
 
-        query = ordenarPor is not null ? ordenarPor(query) : query.OrderBy(q => q.Id);
+        query = orderBy is not null ? orderBy(query) : query.OrderBy(q => q.Id);
 
         query = includes?.Aggregate(query, (current, include) => include(current));
 
@@ -71,5 +73,42 @@ public class BaseRepository<T> : IBaseRepository<T> where T : class, IEntity
             query = query.AsNoTracking();
 
         return await query.ToListAsync();
+    }
+
+    public async Task<Pagination<T>> GetPaginationAsync(
+    int page,
+    Expression<Func<T, bool>>? filter = null,
+    Func<IQueryable<T>, IOrderedQueryable<T>>? orderBy = null,
+    params Expression<Func<T, object>>[] includes)
+    {
+
+        var query = _dbSet.AsQueryable();
+
+        if (filter is not null)
+        {
+            query = query.Where(filter);
+        }
+
+        query = orderBy is not null ? orderBy(query) : query.OrderBy(q => q.Id);
+
+        query = includes
+            .Aggregate(
+                query,
+                (current, include) => current.Include(include.AsPath())
+            );
+
+        var listItens = await query
+            .Skip(_totalDeRegistrosPorPagina * (page - 1))
+            .Take(_totalDeRegistrosPorPagina).ToListAsync();
+
+        var toReturn = new Pagination<T>
+        {
+            TotalRecords = query.Count(),
+            PageSize = _totalDeRegistrosPorPagina,
+            PageNumber = page,
+            Items = listItens
+        };
+
+        return toReturn;
     }
 }

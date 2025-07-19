@@ -1,22 +1,25 @@
 <script setup>
-import { ref, onMounted } from "vue";
-import {
-  getUsers,
-  deleteUser,
-  createRandomUsers,
-} from "../services/userService";
+import { ref, computed, onMounted } from "vue";
+import { getUsersPaged, deleteUser, createRandomUsers } from "../services/userService";
 import { useRouter } from "vue-router";
 
 const users = ref([]);
 const loading = ref(true);
 const error = ref(null);
-const router = useRouter();
 const generatingUsers = ref(false);
+const currentPage = ref(1);
+const totalRecords = ref(0);
+const pageSize = 10;
+
+const router = useRouter();
 
 async function loadUsers() {
   loading.value = true;
+  error.value = null;
   try {
-    users.value = await getUsers();
+    const data = await getUsersPaged(currentPage.value);
+    users.value = data.items;
+    totalRecords.value = data.totalRecords;
   } catch (err) {
     error.value = "Erro ao buscar usuários";
   } finally {
@@ -39,6 +42,7 @@ async function handleGenerateUsers() {
   generatingUsers.value = true;
   try {
     await createRandomUsers(1000);
+    currentPage.value = 1;
     await loadUsers();
   } catch {
     error.value = "Erro ao gerar usuários aleatórios";
@@ -46,6 +50,22 @@ async function handleGenerateUsers() {
     generatingUsers.value = false;
   }
 }
+
+function nextPage() {
+  if (currentPage.value < totalPages.value) {
+    currentPage.value++;
+    loadUsers();
+  }
+}
+
+function prevPage() {
+  if (currentPage.value > 1) {
+    currentPage.value--;
+    loadUsers();
+  }
+}
+
+const totalPages = computed(() => Math.ceil(totalRecords.value / pageSize));
 
 onMounted(loadUsers);
 </script>
@@ -66,10 +86,7 @@ onMounted(loadUsers);
           :disabled="generatingUsers"
           class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 disabled:opacity-50 flex items-center"
         >
-          
-          <span>{{
-            generatingUsers ? "Gerando..." : "Gerar 1000 Usuários"
-          }}</span>
+          <span>{{ generatingUsers ? "Gerando..." : "Gerar 1000 Usuários" }}</span>
         </button>
       </div>
     </div>
@@ -93,15 +110,14 @@ onMounted(loadUsers);
             <div class="flex justify-center space-x-2">
               <button
                 @click="handleEdit(user)"
-                class="text-sm px-2 py-1 rounded bg-gray-100 hover:bg-gray-300 disabled:opacity-50"
+                class="text-sm px-2 py-1 rounded bg-gray-100 hover:bg-gray-300"
                 title="Editar usuário"
               >
                 ✏️
               </button>
-
               <button
                 @click="handleDelete(user.id)"
-                class="text-sm px-2 py-1 rounded bg-gray-100 hover:bg-gray-300 disabled:opacity-70"
+                class="text-sm px-2 py-1 rounded bg-gray-100 hover:bg-gray-300"
                 title="Excluir usuário"
               >
                 🗑️
@@ -113,5 +129,28 @@ onMounted(loadUsers);
     </table>
 
     <p v-else-if="!loading">Nenhum usuário encontrado.</p>
+
+    <!-- Paginação -->
+    <div v-if="totalPages > 1" class="mt-4 flex justify-center space-x-2">
+      <button
+        @click="prevPage"
+        :disabled="currentPage === 1"
+        class="px-4 py-2 bg-gray-200 rounded disabled:opacity-50"
+      >
+        ◀ Anterior
+      </button>
+
+      <span class="px-4 py-2 font-semibold">
+        Página {{ currentPage }} de {{ totalPages }}
+      </span>
+
+      <button
+        @click="nextPage"
+        :disabled="currentPage === totalPages"
+        class="px-4 py-2 bg-gray-200 rounded disabled:opacity-50"
+      >
+        Próxima ▶
+      </button>
+    </div>
   </div>
 </template>
