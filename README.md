@@ -108,16 +108,6 @@ cd api/DesafioVsoft/DesafioVsoft.Test
 dotnet test
 ```
 
-### Testes do Frontend (Vue.js)
-
-Os testes do frontend podem ser executados navegando até o diretório `front-end` e utilizando o comando `npm test`:
-
-```bash
-cd front-end
-npm test
-```
-
----
 
 ## 🗂 Estrutura do Projeto
 
